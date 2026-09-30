@@ -413,7 +413,11 @@ class ClanManagementScreen(ScreenBase):
     def _trigger_action(self, action: dict, app: "GameApp") -> None:
         action_id = action["id"]
         if action_id == "recruitment":
-            self._open_recruitment_modal(app)
+            app.change_screen(RecruitmentScreen())
+        elif action_id == "training":
+            from .training_screens import DiscipleSelectScreen
+
+            app.change_screen(DiscipleSelectScreen())
         elif action_id == "exit":
             app.request_exit()
         else:

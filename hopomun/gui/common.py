@@ -77,3 +77,19 @@ def draw_button(
     text = font.render(label, True, text_color)
     text_rect = text.get_rect(center=rect.center)
     surface.blit(text, text_rect)
+
+
+def wrap_text(text: str, font: pygame.font.Font, max_width: int) -> list:
+    """주어진 폭에 맞게 글자 단위로 줄을 나눈다 (한글은 공백이 적어 글자 단위가 자연스럽다)."""
+    lines = []
+    for paragraph in text.split("\n"):
+        current = ""
+        for char in paragraph:
+            trial = current + char
+            if font.size(trial)[0] > max_width and current:
+                lines.append(current)
+                current = char.lstrip()
+            else:
+                current = trial
+        lines.append(current)
+    return lines
