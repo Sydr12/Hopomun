@@ -94,6 +94,7 @@ export type SkillEffect =
   | { kind: "shield"; ratio: number } // 대상 최대 기혈 × ratio
   | { kind: "status"; status: StatusType; chance: number; turns: number; value?: number; stacks?: number }
   | { kind: "self_status"; status: StatusType; turns: number; value?: number }
+  | { kind: "ally_status"; status: StatusType; turns: number } // CC 걸린 아군 우선, 없으면 기혈 최저 아군 (자신 제외)
   | { kind: "gauge"; amount: number } // 대상 게이지 증감 (1000 = 한 번의 행동)
   | { kind: "push" }
   | { kind: "pull" }

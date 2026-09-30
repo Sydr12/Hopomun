@@ -94,6 +94,11 @@ export const BASIC_SKILLS: ActiveSkillDef[] = [
     effects: [{ kind: "damage", power: 0.85 }, { kind: "heal_ally", power: 0.45 }], desc: "공격하고, 기혈이 가장 낮은 아군을 조금 치료한다." },
   { id: "b_bando", name: "발도참", type: "active", affinity: "common", tags: ["first"], cooldown: 0, range: "single",
     effects: [{ kind: "damage", power: 1.1 }], desc: "칼집에서 뽑는 순간 벤다." },
+  { id: "b_myeonggyeong", name: "명경일권", type: "active", affinity: "common", tags: ["immune"], cooldown: 0, range: "single",
+    effects: [{ kind: "damage", power: 1.15 }, { kind: "ally_status", status: "cc_immune", turns: 1 }],
+    desc: "흔들림 없는 일권. 아군 한 명에게 1턴 CC 면역." },
+  { id: "b_jeomhyeolji", name: "점혈지", type: "active", affinity: "common", tags: ["debuff"], cooldown: 0, range: "single",
+    effects: [{ kind: "damage", power: 1.1 }, { kind: "gauge", amount: -120 }], desc: "혈도를 짚어 적의 기세를 늦춘다." },
   { id: "b_bantan", name: "반탄장", type: "active", affinity: "common", tags: ["counter"], cooldown: 0, range: "single",
     effects: [{ kind: "damage", power: 0.9 }, { kind: "self_status", status: "def_up", turns: 1, value: 0.2 }], desc: "막고 되받아친다." },
 ];
@@ -124,6 +129,14 @@ export const ULTIMATES: ActiveSkillDef[] = [
     effects: [{ kind: "heal", power: 1.6 }, { kind: "cleanse" }], desc: "아군 전체 치료 + 상태이상 해제" },
   { id: "u_yangui", name: "양의검", type: "active", affinity: "common", tags: [], cooldown: 5, initialCooldown: 2, range: "single",
     effects: [{ kind: "damage", power: 2.6 }, { kind: "status", status: "atk_down", chance: 1, turns: 2, value: 0.25 }], desc: "음양의 검로가 적의 기세를 꺾는다." },
+  { id: "u_cheongang", name: "천강부동", type: "active", affinity: "common", tags: ["immune"], cooldown: 6, initialCooldown: 3, range: "single",
+    effects: [{ kind: "damage", power: 2.4 }, { kind: "self_status", status: "atk_up", turns: 2, value: 0.2 }], desc: "산을 부수는 일권, 기세가 오른다." },
+  { id: "u_paewang", name: "패왕붕산권", type: "active", affinity: "common", tags: [], cooldown: 5, initialCooldown: 2, range: "pierce",
+    effects: [{ kind: "damage", power: 2.2 }, { kind: "push" }], desc: "한 줄을 꿰뚫고 밀어낸다." },
+  { id: "u_paljin", name: "팔진도", type: "active", affinity: "common", tags: ["debuff"], cooldown: 6, initialCooldown: 3, range: "all",
+    effects: [{ kind: "damage", power: 1.1 }, { kind: "status", status: "stun", chance: 0.4, turns: 1 }], desc: "진법에 가둬 적 전체를 기절시킨다." },
+  { id: "u_cheongi", name: "천기신산", type: "active", affinity: "common", tags: ["debuff"], cooldown: 5, initialCooldown: 2, range: "single",
+    effects: [{ kind: "damage", power: 2.3 }, { kind: "status", status: "seal", chance: 0.8, turns: 2 }], desc: "하늘의 수를 읽어 봉인한다." },
 ];
 
 /** 보스 · 적 전용 스킬 */

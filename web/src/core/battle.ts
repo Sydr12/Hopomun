@@ -110,7 +110,6 @@ interface Unit {
   cooldowns: number[];
   actives: { def: ActiveSkillDef; power: number; condition: SkillCondition }[];
   mods: Required<Omit<PassiveMods, "firstCcNull" | "poisonImmune">> & { firstCcNull: boolean; poisonImmune: boolean };
-  ccResist: Partial<Record<StatusType, number>>;
   actionsTaken: number;
   chainStacks: number;
   unshakenStacks: number;
@@ -207,7 +206,7 @@ export class Battle {
 
     return {
       uid, spec, name: spec.name, side, pos: { ...spec.pos }, maxHp, hp: maxHp, shield: 0,
-      gauge: 0, alive: true, statuses: [], cooldowns, actives, mods, ccResist: {},
+      gauge: 0, alive: true, statuses: [], cooldowns, actives, mods,
       actionsTaken: 0, chainStacks: 0, unshakenStacks: 0, counterBoost: 0, evadeBonus: false,
       vajraUsed: false, firstCcNullUsed: false, firstAttackDone: false,
     };
@@ -319,13 +318,9 @@ export class Battle {
     const stun = this.has(actor, "stun");
     const freeze = this.has(actor, "freeze");
     if (stun || freeze) {
-      const type: StatusType = stun ? "stun" : "freeze";
       this.log(actor, "skip", `${actor.name}은(는) ${stun ? "기절" : "빙결"} 상태라 움직이지 못한다.`);
-      if (stun) {
-        actor.statuses = actor.statuses.filter((s) => s !== stun);
-        actor.ccResist.stun = 2;
-      }
-      this.endTurn(actor, type === "freeze");
+      if (stun) actor.statuses = actor.statuses.filter((s) => s !== stun);
+      this.endTurn(actor);
       return;
     }
 
@@ -333,7 +328,7 @@ export class Battle {
     this.useSkill(actor, choice.index);
     actor.actionsTaken += 1;
     this.afterAction(actor, choice.index);
-    if (actor.alive) this.endTurn(actor, false);
+    if (actor.alive) this.endTurn(actor);
   }
 
   private chooseSkill(actor: Unit): { index: number } {
@@ -500,6 +495,14 @@ export class Battle {
           hits.push({ uid: actor.uid, status: effect.status });
           break;
         }
+        case "ally_status": {
+          const allies = this.allies(actor).filter((u) => u !== actor);
+          const pool = allies.filter((u) => this.hasCc(u));
+          const ally = (pool.length ? pool : allies).sort((a, b) => this.hpRatio(a) - this.hpRatio(b))[0] ?? actor;
+          this.addStatus(ally, effect.status, effect.turns, 0, 1);
+          hits.push({ uid: ally.uid, status: effect.status });
+          break;
+        }
         case "gauge":
           for (const target of targets) if (target.alive) target.gauge = Math.max(0, target.gauge + effect.amount);
           break;
@@ -600,7 +603,6 @@ export class Battle {
       if (frozen) {
         damage *= 1.3;
         target.statuses = target.statuses.filter((s) => s.type !== "freeze");
-        target.ccResist.freeze = 1;
       }
       if (target.spec.trait === "guardian" && this.has(target, "taunt")) damage *= 0.7;
       damage = Math.max(1, Math.round(damage));
@@ -723,7 +725,7 @@ export class Battle {
           hits.push({ uid: target.uid, resisted: type });
           return;
         }
-        if (this.has(target, "cc_immune") || (target.ccResist[type] ?? 0) > 0) {
+        if (this.has(target, "cc_immune")) {
           hits.push({ uid: target.uid, resisted: type });
           return;
         }
@@ -779,22 +781,13 @@ export class Battle {
     }
   }
 
-  private endTurn(actor: Unit, frozen: boolean): void {
+  private endTurn(actor: Unit): void {
     for (const status of actor.statuses) {
       if (status.fresh) status.fresh = false;
       else status.turns -= 1;
     }
-    const expired = actor.statuses.filter((s) => s.turns <= 0);
     actor.statuses = actor.statuses.filter((s) => s.turns > 0);
     if (actor.counterBoost > 0) actor.counterBoost -= 1;
-
-    // CC 면역은 '풀린 뒤 1턴': 자기 턴 종료마다 1씩 줄어든다.
-    for (const key of Object.keys(actor.ccResist) as StatusType[]) {
-      const left = (actor.ccResist[key] ?? 0) - 1;
-      if (left <= 0) delete actor.ccResist[key];
-      else actor.ccResist[key] = left;
-    }
-    if (frozen && expired.some((s) => s.type === "freeze")) actor.ccResist.freeze = 1;
 
     // 금강불괴: 자기 턴 종료 시 기혈 30% 미만이면 1회 발동, 다음 턴 종료까지 무적
     if (actor.spec.trait === "vajra" && !actor.vajraUsed && actor.alive && this.hpRatio(actor) < 0.3) {

@@ -203,6 +203,30 @@ export const CHARACTER_EVENTS: Record<string, EventDef> = Object.fromEntries(
       { label: "치료한다", result: "의술이 늘었다.", effects: { stats: { inner: 8, vital: 8 }, stamina: -10 } },
       { label: "의원에 보낸다", result: "무인이 감사의 뜻으로 은자를 남겼다.", effects: { silver: 40 } },
     ]),
+    ev("ev_dokgo_1", "녹림의 부름", "옛 녹림 형제들이 산채로 돌아오라 한다.", [
+      { label: "거절한다", result: "마음이 더 단단해졌다.", effects: { stats: { guard: 12 } } },
+      { label: "술 한잔만 한다", result: "호탕하게 웃고 헤어졌다.", effects: { stamina: 25 } },
+    ]),
+    ev("ev_dokgo_2", "바위 들기", "산길을 막은 바위를 치워야 한다.", [
+      { label: "맨손으로 든다", result: "팔에 힘이 붙었다.", effects: { stats: { outer: 14 }, stamina: -10 } },
+      { label: "지렛대를 쓴다", result: "수월하게 치웠다.", effects: { stats: { vital: 8 } } },
+    ]),
+    ev("ev_dokgo_3", "도박판", "주막에서 도박판이 벌어졌다.", [
+      { label: "한 판 한다", result: "제법 땄다.", effects: { silver: 70 } },
+      { label: "지켜만 본다", result: "사람 보는 눈이 늘었다.", effects: { stats: { guard: 8 } } },
+    ]),
+    ev("ev_jegal_1", "기문진법", "제갈윤이 진법 연습을 권한다.", [
+      { label: "함께 연구한다", result: "내공 운용이 정교해졌다.", effects: { stats: { inner: 14 } } },
+      { label: "쉬라고 말린다", result: "제갈윤이 멋쩍게 웃었다.", effects: { stamina: 25 } },
+    ]),
+    ev("ev_jegal_2", "혈도도(穴道圖)", "오래된 혈도도를 손에 넣었다.", [
+      { label: "외운다", result: "점혈이 정확해졌다.", effects: { trainingExp: { id: "inner", amount: 2 } } },
+      { label: "팔아버린다", result: "좋은 값을 받았다.", effects: { silver: 80 } },
+    ]),
+    ev("ev_jegal_3", "세가의 체면", "세가 모임에서 실력을 보이라 한다.", [
+      { label: "시연한다", result: "칭찬과 후원금을 받았다.", effects: { silver: 60, stats: { inner: 6 } } },
+      { label: "사양한다", result: "조용히 수련에 매진했다.", effects: { stats: { guard: 10 } } },
+    ]),
   ]).map((e) => [e.id, e]),
 );
 
@@ -234,6 +258,20 @@ export const BOND_EVENTS: Record<string, EventDef[]> = {
     ev("bd_nh_3", "추격자", "혈교 추격자가 두 사람을 노린다.", [
       { label: "함께 싸운다", result: "등을 맡기고 싸웠다.", effects: { stats: { outer: 12, inner: 12 }, stamina: -25 } },
       { label: "따돌린다", result: "무사히 벗어났다.", effects: { stamina: -5 } },
+    ]),
+  ],
+  "dokgo_ung+jegal_yun": [
+    ev("bd_dj_1", "책사와 호걸", "제갈윤이 독고웅에게 진법의 한 축을 맡긴다.", [
+      { label: "버틴다", result: "진법이 완성되었다.", effects: { stats: { guard: 12, vital: 8 } } },
+      { label: "돌파한다", result: "진법을 부쉈다.", effects: { stats: { outer: 10, inner: 10 } } },
+    ]),
+    ev("bd_dj_2", "술과 바둑", "한 사람은 술을, 한 사람은 바둑을 권한다.", [
+      { label: "술", result: "호탕하게 취했다.", effects: { stamina: 30 } },
+      { label: "바둑", result: "수읽기가 늘었다.", effects: { trainingExp: { id: "meditate", amount: 2 } } },
+    ]),
+    ev("bd_dj_3", "등을 맡기다", "습격 속에서 서로의 등을 지켰다.", [
+      { label: "끝까지 싸운다", result: "둘 다 한층 강해졌다.", effects: { stats: { outer: 10, inner: 10 }, stamina: -20 } },
+      { label: "퇴로를 연다", result: "무사히 빠져나왔다.", effects: { stats: { guard: 10 } } },
     ]),
   ],
   "cheong_a+mujin": [

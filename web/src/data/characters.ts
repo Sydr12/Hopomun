@@ -1,7 +1,7 @@
 import type { CharacterDef } from "../core/types";
 
 /**
- * 개발용 임시 캐릭터 6명. 최종 32명 데이터는 별도 데이터 표 작업에서 채운다.
+ * 개발용 임시 캐릭터 8명. 최종 32명 데이터는 별도 데이터 표 작업에서 채운다.
  * 천성 · 세력 · 계열이 고르게 섞이도록 구성했다.
  */
 export const CHARACTERS: CharacterDef[] = [
@@ -59,6 +59,24 @@ export const CHARACTERS: CharacterDef[] = [
     events: ["ev_cheong_1", "ev_cheong_2", "ev_cheong_3"],
     intro: "무당의 여도사. 의술과 태극검을 함께 익혔다.",
   },
+  {
+    id: "dokgo_ung", name: "독고웅", faction: "sapa", sect: "녹림", attackType: "outer",
+    baseStats: { outer: 90, inner: 25, guard: 62, vital: 80 },
+    trainingStart: { outer: 36, inner: 10, guard: 28, vital: 32 },
+    agility: 98, trait: "unshaken", basicSkill: "b_myeonggyeong",
+    ultimates: ["u_cheongang", "u_paewang"], bond: "jegal_yun",
+    events: ["ev_dokgo_1", "ev_dokgo_2", "ev_dokgo_3"],
+    intro: "녹림의 호걸. 무엇에도 흔들리지 않는다.",
+  },
+  {
+    id: "jegal_yun", name: "제갈윤", faction: "sega", sect: "제갈세가", attackType: "inner",
+    baseStats: { outer: 25, inner: 82, guard: 52, vital: 62 },
+    trainingStart: { outer: 10, inner: 36, guard: 24, vital: 28 },
+    agility: 110, trait: "acupoint", basicSkill: "b_jeomhyeolji",
+    ultimates: ["u_paljin", "u_cheongi"], bond: "dokgo_ung",
+    events: ["ev_jegal_1", "ev_jegal_2", "ev_jegal_3"],
+    intro: "제갈세가의 책사. 혈도와 진법에 밝다.",
+  },
 ];
 
 export const CHARACTER_BY_ID: Record<string, CharacterDef> = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
@@ -79,4 +97,5 @@ export const BOND_BUFFS: Record<string, { stat: "atkPct" | "defPct" | "hpPct" | 
   [bondKey("dang_soha", "seol_hwa")]: { stat: "speedPct", value: 0.06, name: "독과 얼음" },
   [bondKey("namgung_hyeon", "hyeol_yeong")]: { stat: "atkPct", value: 0.08, name: "검과 피의 맹세" },
   [bondKey("mujin", "cheong_a")]: { stat: "defPct", value: 0.1, name: "소림과 무당" },
+  [bondKey("dokgo_ung", "jegal_yun")]: { stat: "hpPct", value: 0.08, name: "녹림과 책사" },
 };

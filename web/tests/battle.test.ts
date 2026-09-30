@@ -106,7 +106,7 @@ describe("전투 엔진", () => {
     expect(first?.skill).toBe("e_strike");
   });
 
-  it("기절한 캐릭터는 한 번 행동을 건너뛰고, 직후 1턴간 기절 면역이 된다", () => {
+  it("기절한 캐릭터는 한 번 행동을 건너뛰고, 풀린 직후 다시 기절할 수 있다 (회복 후 면역 없음)", () => {
     const battle = new Battle([unit({ name: "피해자" })], [unit({ name: "상대" })], new Rng(1));
     const b = internals(battle);
     const victim = b.units[0];
@@ -114,7 +114,27 @@ describe("전투 엔진", () => {
     b.takeTurn(victim);
     expect(battle.events.at(-1)!.kind).toBe("skip");
     expect(victim.statuses.some((s) => s.type === "stun")).toBe(false);
-    expect((victim as unknown as { ccResist: Record<string, number> }).ccResist.stun).toBeGreaterThan(0);
+    victim.statuses.push({ type: "stun", turns: 1 });
+    b.takeTurn(victim);
+    expect(battle.events.at(-1)!.kind).toBe("skip");
+  });
+
+  it("CC 면역을 부여받은 아군에게는 기절이 걸리지 않는다", () => {
+    const giver = unit({ id: "dokgo_ung", name: "독고웅", trait: "unshaken",
+      actives: [{ skillId: "b_myeonggyeong", power: 1, condition: { kind: "always" } }] });
+    const ally = unit({ id: "ally", name: "아군", pos: { col: 1, row: 1 } });
+    const stunner = unit({ name: "기절술사", actives: [
+      { skillId: "e_stun", power: 1, condition: { kind: "always" } },
+      { skillId: "e_strike", power: 1, condition: { kind: "always" } },
+    ] });
+    const battle = new Battle([giver, ally], [stunner], new Rng(1));
+    const b = internals(battle);
+    b.takeTurn(b.units[0]); // 독고웅 행동 → 아군에게 CC 면역
+    expect(b.units[1].statuses.some((s) => s.type === "cc_immune")).toBe(true);
+    const tb = battle as unknown as { tryApplyStatus(a: unknown, t: unknown, e: unknown, d: unknown, h: unknown[]): void };
+    const hits: { resisted?: string }[] = [];
+    tb.tryApplyStatus(b.units[2], b.units[1], { kind: "status", status: "stun", chance: 1, turns: 1 }, { tags: [] }, hits);
+    expect(hits[0].resisted).toBe("stun");
   });
 
   it("금강불괴는 자기 턴 종료 시 기혈 30% 미만이면 발동해 다음 턴 종료까지 무적", () => {

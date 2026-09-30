@@ -17,7 +17,7 @@ import { bondKey, getCharacter } from "../data/characters";
 import { BOND_EVENTS, CHARACTER_EVENTS, REGION_EVENTS, type EventDef, type EventEffects } from "../data/events";
 import { ITEMS } from "../data/items";
 import { getRegion, REGIONS, regionsOfTier } from "../data/regions";
-import { POOL_ACTIVES, POOL_PASSIVES } from "../data/skills";
+import { POOL_ACTIVES, POOL_PASSIVES, SKILLS } from "../data/skills";
 import { TRAITS } from "../data/traits";
 import { runBattle, type BattleResult } from "./battle";
 import { bossCombatant, characterCombatant, foeCombatant, shadowCombatant } from "./combatants";
@@ -316,7 +316,7 @@ export function evolvableSlots(state: TrainingState): SkillSlot[] {
 
 const NEXT_GRADE: Record<SkillGrade, SkillGrade> = { C: "B", B: "A", A: "S", S: "S" };
 
-export function shopBuy(state: TrainingState, offerIndex: number, evolveSlot?: SkillSlot): ActionResult {
+export function shopBuy(state: TrainingState, offerIndex: number): ActionResult {
   expectPhase(state, "shop");
   const offer = state.shop!.offers[offerIndex];
   if (!offer || offer.sold) throw new Error("살 수 없는 상품입니다.");
@@ -324,11 +324,12 @@ export function shopBuy(state: TrainingState, offerIndex: number, evolveSlot?: S
   const result = newResult("상점");
   if (offer.kind === "evolve") {
     const slots = evolvableSlots(state);
-    const slot = evolveSlot ?? slots[0];
-    if (!slot || !slots.includes(slot)) throw new Error("진화할 스킬이 없습니다.");
+    if (slots.length === 0) throw new Error("진화할 스킬이 없습니다.");
+    // 진화할 스킬은 무작위로 하나 정해진다.
+    const slot = withRng(state, (rng) => rng.pick(slots));
     const skill = state.skills[slot]!;
     skill.grade = NEXT_GRADE[skill.grade];
-    result.messages.push(`스킬이 ${skill.grade}등급으로 진화했다!`);
+    result.messages.push(`「${SKILLS[skill.id].name}」이(가) ${skill.grade}등급으로 진화했다!`);
   } else {
     const item = ITEMS.find((it) => it.id === offer.itemId)!;
     const tierMult = TIER_GROWTH[regionIndex(state)];
