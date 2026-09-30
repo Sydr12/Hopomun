@@ -7,7 +7,8 @@ import {
   BOND_EVENT_TURNS, BOSS_STAT_REWARD, CHARACTER_EVENT_TURNS, EVOLVE_OFFER_CHANCE, EVOLVE_PRICE, FAIL_GAIN_RATIO,
   FAIL_RATE_PER_POINT, FAIL_THRESHOLD, FINAL_LOSE_STAT_REWARD, FINAL_TURN, FINAL_WIN_STAT_REWARD, FOCUS_MULT,
   GRADE_WEIGHTS, HOME_REGION_BONUS, MAX_FAIL_RATE, MAX_STAMINA, PERSONAL_EVENT_CHANCE, PREMIUM_REST_AMOUNT,
-  PREMIUM_REST_COST, PREMIUM_REST_CRIT_CHANCE, QUEST_LOSS_REWARD, QUEST_POWER_SCALE, QUEST_REWARD,
+  PREMIUM_REST_COST, PREMIUM_REST_CRIT_CHANCE, QUEST_LOSS_REWARD, QUEST_POWER_SCALE, QUEST_REWARD, START_SILVER,
+  BOSS_SILVER_REWARD,
   REGION_EVENT_CHANCE, REGION_EVENT_TURNS_IN_REGION, REST_AMOUNT, REST_CRIT_AMOUNT, REST_CRIT_CHANCE, RETURN_TURN,
   SHOP_OFFER_COUNT, SHOP_REROLL_BASE, SHOP_REROLL_STEP, SHOP_TURNS_IN_REGION, TAG_MATCH_WEIGHT, TIER_GROWTH,
   TRAINING_LEVEL_BONUS, TRAINING_LEVEL_EXP, TRAININGS, TRAIN_CRIT_CHANCE, TRAIN_CRIT_MULT, TURNS_PER_REGION,
@@ -78,6 +79,15 @@ export interface TrainingState {
   result: Shimdeuk | null;
 }
 
+/** 스킬 획득 · 진화 알림 (화면에서 전용 팝업으로 보여준다) */
+export interface Acquired {
+  kind: "skill" | "ultimate" | "evolve";
+  id: string;
+  grade?: SkillGrade;
+  from?: SkillGrade;
+  level?: 1 | 2;
+}
+
 export interface ActionResult {
   title: string;
   messages: string[];
@@ -85,6 +95,10 @@ export interface ActionResult {
   success: boolean;
   crit: boolean;
   battle?: BattleResult;
+  acquired?: Acquired;
+  levelUp?: { id: TrainingId; level: number };
+  stamina?: { before: number; after: number };
+  silver?: number;
 }
 
 // ---------------------------------------------------------------- 조회
@@ -105,9 +119,22 @@ export function trainingLevel(state: TrainingState, id: TrainingId): number {
   return TRAINING_LEVEL_EXP.filter((t) => exp >= t).length;
 }
 
-export function failRate(state: TrainingState): number {
-  if (state.stamina >= FAIL_THRESHOLD) return 0;
-  return Math.min(MAX_FAIL_RATE, (FAIL_THRESHOLD - state.stamina) * FAIL_RATE_PER_POINT);
+/** 훈련별 실패 확률: 훈련 후 예상 기력이 기준보다 낮을수록 높아진다. */
+export function failRate(state: TrainingState, id: TrainingId): number {
+  const def = TRAININGS.find((t) => t.id === id)!;
+  if (!def.canFail) return 0;
+  const after = state.stamina + def.stamina;
+  if (after >= FAIL_THRESHOLD) return 0;
+  return Math.min(MAX_FAIL_RATE, (FAIL_THRESHOLD - after) * FAIL_RATE_PER_POINT);
+}
+
+/** 훈련 레벨 진행도: 현재 레벨 안에서의 경험치 / 다음 레벨까지 필요량 */
+export function trainingProgress(state: TrainingState, id: TrainingId): { level: number; exp: number; need: number } {
+  const level = trainingLevel(state, id);
+  const exp = state.trainingExp[id];
+  if (level >= TRAINING_LEVEL_EXP.length) return { level, exp: 1, need: 1 };
+  const floor = TRAINING_LEVEL_EXP[level - 1];
+  return { level, exp: exp - floor, need: TRAINING_LEVEL_EXP[level] - floor };
 }
 
 function growthMult(state: TrainingState, stat: StatKey): number {
@@ -133,8 +160,8 @@ export function rerollCost(state: TrainingState): number {
   return SHOP_REROLL_BASE + SHOP_REROLL_STEP * (state.shop?.rerolls ?? 0);
 }
 
-export function premiumRestCost(state: TrainingState): number {
-  return Math.round(PREMIUM_REST_COST * TIER_GROWTH[regionIndex(state)]);
+export function premiumRestCost(): number {
+  return PREMIUM_REST_COST;
 }
 
 export function currentEvent(state: TrainingState): EventDef | null {
@@ -165,7 +192,7 @@ export function createTraining(characterId: string, seed: number): TrainingState
     stats: { ...character.trainingStart },
     startStats: { ...character.trainingStart },
     stamina: MAX_STAMINA,
-    silver: 0,
+    silver: character.startSilver ?? START_SILVER,
     trainingExp: { outer: 0, inner: 0, guard: 0, vital: 0, meditate: 0 },
     skills: {},
     eventQueue: [],
@@ -305,7 +332,9 @@ function rollShop(state: TrainingState, rng: Rng): ShopOffer[] {
       continue;
     }
     const item = rng.weighted(ITEMS, (it) => it.weight);
-    offers.push({ kind: "item", itemId: item.id, price: Math.round(item.price * TIER_GROWTH[tier]), sold: false });
+    // 스탯 상품은 난이도에 따라 효과와 가격이 함께 오르고, 기력 상품은 고정가.
+    const price = item.stats ? Math.round(item.price * TIER_GROWTH[tier]) : item.price;
+    offers.push({ kind: "item", itemId: item.id, price, sold: false });
   }
   return offers;
 }
@@ -328,7 +357,9 @@ export function shopBuy(state: TrainingState, offerIndex: number): ActionResult 
     // 진화할 스킬은 무작위로 하나 정해진다.
     const slot = withRng(state, (rng) => rng.pick(slots));
     const skill = state.skills[slot]!;
+    const from = skill.grade;
     skill.grade = NEXT_GRADE[skill.grade];
+    result.acquired = { kind: "evolve", id: skill.id, grade: skill.grade, from };
     result.messages.push(`「${SKILLS[skill.id].name}」이(가) ${skill.grade}등급으로 진화했다!`);
   } else {
     const item = ITEMS.find((it) => it.id === offer.itemId)!;
@@ -380,7 +411,7 @@ export function train(state: TrainingState, id: TrainingId): ActionResult {
   const result = newResult(def.name);
   const preview = trainingPreview(state, id);
   withRng(state, (rng) => {
-    const failed = def.canFail && rng.chance(failRate(state));
+    const failed = rng.chance(failRate(state, id));
     const crit = !failed && rng.chance(TRAIN_CRIT_CHANCE);
     result.success = !failed;
     result.crit = crit;
@@ -396,9 +427,14 @@ export function train(state: TrainingState, id: TrainingId): ActionResult {
     if (crit) result.messages.push("깨달음이 왔다! 성장치 증가.");
   });
   const levelBefore = trainingLevel(state, id);
+  const staminaBefore = state.stamina;
   state.stamina = clampStamina(state.stamina + def.stamina);
+  result.stamina = { before: staminaBefore, after: state.stamina };
   state.trainingExp[id] += 1;
-  if (trainingLevel(state, id) > levelBefore) result.messages.push(`${def.name} Lv${trainingLevel(state, id)} 달성!`);
+  if (trainingLevel(state, id) > levelBefore) {
+    result.levelUp = { id, level: trainingLevel(state, id) };
+    result.messages.push(`${def.name} Lv${trainingLevel(state, id)} 달성!`);
+  }
   state.log.push(`[${state.turn}턴] ${def.name}${result.success ? "" : " (실패)"}${result.crit ? " (크리티컬)" : ""}`);
   endTurn(state);
   return result;
@@ -408,7 +444,7 @@ export function rest(state: TrainingState, premium = false): ActionResult {
   expectPhase(state, "action");
   const result = newResult(premium ? "고급 휴식" : "휴식");
   if (premium) {
-    const cost = premiumRestCost(state);
+    const cost = premiumRestCost();
     if (state.silver < cost) throw new Error("은자가 부족합니다.");
     state.silver -= cost;
   }
@@ -423,7 +459,8 @@ export function rest(state: TrainingState, premium = false): ActionResult {
     }
     const before = state.stamina;
     state.stamina = clampStamina(state.stamina + amount);
-    result.messages.push(`기력 +${state.stamina - before}${result.crit ? " (푹 쉬었다!)" : ""}`);
+    result.stamina = { before, after: state.stamina };
+    result.messages.push(`기력 +${state.stamina - before}${result.crit ? (premium ? " (완전 회복!)" : " (푹 쉬었다!)") : ""}`);
   });
   state.log.push(`[${state.turn}턴] ${result.title}`);
   endTurn(state);
@@ -445,6 +482,7 @@ export function quest(state: TrainingState): ActionResult {
       ? Math.round(QUEST_REWARD[region.tier] * rng.range(0.9, 1.1))
       : QUEST_LOSS_REWARD;
     state.silver += reward;
+    result.silver = reward;
     result.messages.push(result.success ? `${foeName}을(를) 물리쳤다! 은자 +${reward}` : `${foeName}에게 밀려났다… 은자 +${reward}`);
   });
   state.log.push(`[${state.turn}턴] 의뢰 ${result.success ? "성공" : "실패"}`);
@@ -476,7 +514,10 @@ export function fightBoss(state: TrainingState): ActionResult {
     state.stats[key] += reward;
     result.gains[key] = reward;
   }
-  result.messages.push(`${region.boss.name}을(를) 꺾었다! 모든 수련 능력치 +${reward}`);
+  const silver = BOSS_SILVER_REWARD[region.tier];
+  state.silver += silver;
+  result.silver = silver;
+  result.messages.push(`${region.boss.name}을(를) 꺾었다! 모든 수련 능력치 +${reward}, 은자 +${silver}`);
   state.log.push(`[${state.turn}턴] ${region.boss.name} 격파`);
   const slot = SLOT_BY_TIER[region.tier];
   state.skillChoice = { slot, candidates: withRng(state, (rng) => rollSkillCandidates(state, slot, rng)) };
@@ -497,14 +538,18 @@ export function rollSkillCandidates(state: TrainingState, slot: SkillSlot, rng: 
   return picked.map((s) => ({ id: s.id, grade: rng.weighted(grades, (g) => GRADE_WEIGHTS[g]) }));
 }
 
-export function chooseSkill(state: TrainingState, index: number): void {
+export function chooseSkill(state: TrainingState, index: number): ActionResult {
   expectPhase(state, "skill_choice");
   const choice = state.skillChoice!;
   const skill = choice.candidates[index];
   if (!skill) throw new Error("없는 후보입니다.");
   state.skills[choice.slot] = { ...skill };
   state.skillChoice = null;
+  const result = newResult("스킬 습득");
+  result.acquired = { kind: "skill", id: skill.id, grade: skill.grade };
+  state.log.push(`[${state.turn}턴] 「${SKILLS[skill.id].name}」(${skill.grade}) 습득`);
   endTurn(state);
+  return result;
 }
 
 // ---------------------------------------------------------------- 귀환 · 최종 시험
@@ -536,6 +581,7 @@ export function finalTest(state: TrainingState): ActionResult {
   const character = getCharacter(state.characterId);
   const ultimate = withRng(state, (rng) => rng.pick(character.ultimates));
   state.skills.ultimate = { id: ultimate, level: 1 };
+  result.acquired = { kind: "ultimate", id: ultimate, level: 1 };
   result.messages.push(result.success ? "심마를 이겨냈다!" : "심마에게 졌지만, 깨달음은 남았다.");
   result.messages.push(`필살기를 깨우쳤다!`);
   state.log.push(`[${state.turn}턴] 최종 시험 ${result.success ? "통과" : "실패"}`);

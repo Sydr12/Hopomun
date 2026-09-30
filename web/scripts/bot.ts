@@ -49,7 +49,7 @@ export function botStep(state: TrainingState): void {
     }
     case "action": {
       if (state.stamina < 45) {
-        if (state.silver >= premiumRestCost(state) * 2) rest(state, true);
+        if (state.silver >= premiumRestCost() * 2) rest(state, true);
         else if (state.silver < 40 && state.stamina >= 30) quest(state);
         else rest(state);
         return;
@@ -59,7 +59,7 @@ export function botStep(state: TrainingState): void {
       const target: Record<string, number> = { [attack]: 1, vital: 0.7, guard: 0.5 };
       const best = (Object.keys(target) as TrainingId[]).reduce((a, b) =>
         state.stats[a as never] / target[a] <= state.stats[b as never] / target[b] ? a : b);
-      if (failRate(state) > 0.2) return void rest(state);
+      if (failRate(state, best) > 0.2) return void rest(state);
       train(state, best);
       return;
     }

@@ -49,12 +49,16 @@ describe("수련", () => {
     expect(state.turn).toBe(2);
   });
 
-  it("기력이 낮으면 실패 확률이 생기고, 실패해도 일부 성장과 경험치는 얻는다", () => {
+  it("실패 확률은 훈련 후 예상 기력 기준이라 훈련마다 다르다", () => {
     const state = started();
-    state.stamina = 0;
-    expect(failRate(state)).toBeCloseTo(0.9);
+    state.stamina = 40; // 외공 -20 → 20, 호신 -18 → 22, 명상 +10 → 50
+    expect(failRate(state, "outer")).toBeCloseTo(0.2);
+    expect(failRate(state, "guard")).toBeCloseTo(0.16);
+    expect(failRate(state, "meditate")).toBe(0);
     state.stamina = 60;
-    expect(failRate(state)).toBe(0);
+    expect(failRate(state, "outer")).toBe(0);
+    state.stamina = 0;
+    expect(failRate(state, "outer")).toBeCloseTo(0.9);
 
     let sawFailure = false;
     for (let seed = 0; seed < 40 && !sawFailure; seed++) {
@@ -70,11 +74,17 @@ describe("수련", () => {
     expect(sawFailure).toBe(true);
   });
 
+  it("시작 자금은 기본 50, 캐릭터에 따라 다르다", () => {
+    expect(createTraining("dang_soha", 1).silver).toBe(50);
+    expect(createTraining("namgung_hyeon", 1).silver).toBe(180);
+    expect(createTraining("hyeol_yeong", 1).silver).toBe(0);
+  });
+
   it("같은 훈련을 반복하면 레벨이 오른다", () => {
     const state = started();
-    state.trainingExp.guard = 2;
+    state.trainingExp.guard = 1;
     expect(trainingLevel(state, "guard")).toBe(1);
-    state.trainingExp.guard = 3;
+    state.trainingExp.guard = 2;
     expect(trainingLevel(state, "guard")).toBe(2);
   });
 
@@ -111,12 +121,15 @@ describe("수련", () => {
     state.turn = 10;
     state.phase = "boss";
     state.stats = { outer: 2000, inner: 0, guard: 1000, vital: 1000 };
+    const silverBefore = state.silver;
     const result = fightBoss(state);
     expect(result.success).toBe(true);
+    expect(state.silver).toBe(silverBefore + 60);
     expect(state.phase).toBe("skill_choice");
     expect(state.skillChoice!.slot).toBe("active1");
     expect(state.skillChoice!.candidates).toHaveLength(3);
-    chooseSkill(state, 0);
+    const picked = chooseSkill(state, 0);
+    expect(picked.acquired?.kind).toBe("skill");
     expect(state.skills.active1).toBeDefined();
     expect(state.phase).toBe("choose_region");
     expect(state.regionOptions).toEqual(regionsOfTier(1).map((r) => r.id));

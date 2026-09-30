@@ -17,15 +17,16 @@ export const PERSONAL_EVENT_CHANCE = 0.6;
 
 // ---------------------------------------------------------------- 기력 · 훈련
 export const MAX_STAMINA = 100;
-export const FAIL_THRESHOLD = 50;
-export const FAIL_RATE_PER_POINT = 0.018;
+/** 실패 확률은 "훈련 후 예상 기력" 기준: 이 값보다 낮아지는 만큼 확률이 오른다. */
+export const FAIL_THRESHOLD = 30;
+export const FAIL_RATE_PER_POINT = 0.02;
 export const MAX_FAIL_RATE = 0.9;
 export const FAIL_GAIN_RATIO = 0.3;
 export const TRAIN_CRIT_CHANCE = 0.1;
 export const TRAIN_CRIT_MULT = 1.5;
 
 /** 훈련 레벨 경험치 누적 기준 (Lv1..Lv5) */
-export const TRAINING_LEVEL_EXP = [0, 3, 7, 12, 18];
+export const TRAINING_LEVEL_EXP = [0, 2, 4, 7, 10];
 export const TRAINING_LEVEL_BONUS = 0.15;
 
 /** 난이도(지역 순번)별 성장 배율 */
@@ -57,12 +58,19 @@ export const TRAININGS: TrainingDef[] = [
 export const REST_AMOUNT = 40;
 export const REST_CRIT_CHANCE = 0.15;
 export const REST_CRIT_AMOUNT = 60;
-export const PREMIUM_REST_COST = 60;
+/**
+ * 기력 가치: 기력환(+30)이 은자 40 → 기력 1 ≈ 은자 1.3.
+ * 고급 휴식은 일반 휴식보다 기력 +25 더 회복(+크리티컬 시 완전 회복) → 약 은자 30으로 고정.
+ */
+export const PREMIUM_REST_COST = 30;
 export const PREMIUM_REST_AMOUNT = 65;
 export const PREMIUM_REST_CRIT_CHANCE = 0.25;
 
 // ---------------------------------------------------------------- 의뢰 · 재화
 export const QUEST_REWARD = [40, 60, 85, 115];
+export const START_SILVER = 50;
+/** 보스 격파 은자 보상 (난이도별) */
+export const BOSS_SILVER_REWARD = [60, 90, 120, 150];
 export const QUEST_LOSS_REWARD = 10;
 export const QUEST_POWER_SCALE = 0.7;
 
@@ -79,12 +87,12 @@ export const EVOLVE_PRICE = 150;
  * 보스 스탯 = 기준 × 보스 프로필 × 난이도 계수.
  */
 export const TIER_REFERENCE = [
-  { atk: 179, guard: 109, vital: 139 },
-  { atk: 274, guard: 157, vital: 208 },
-  { atk: 402, guard: 221, vital: 297 },
-  { atk: 565, guard: 297, vital: 407 },
+  { atk: 194, guard: 116, vital: 153 },
+  { atk: 305, guard: 174, vital: 232 },
+  { atk: 457, guard: 248, vital: 337 },
+  { atk: 654, guard: 347, vital: 475 },
 ];
-export const BOSS_DIFFICULTY = [0.78, 0.8, 0.73, 0.79];
+export const BOSS_DIFFICULTY = [0.72, 0.8, 0.73, 0.79];
 export const BOSS_STAT_REWARD = [12, 18, 26, 36];
 export const FINAL_WIN_STAT_REWARD = 40;
 export const FINAL_LOSE_STAT_REWARD = 15;
@@ -100,10 +108,10 @@ export const TAG_MATCH_WEIGHT = 2;
 // ---------------------------------------------------------------- 심득 평가
 /** 봇 기준 분포 목표: 범품 10% · 정품 25% · 상품 35% · 절품 22% · 신품 8% */
 export const GRADE_THRESHOLDS: [number, "범품" | "정품" | "상품" | "절품" | "신품"][] = [
-  [1860, "신품"],
-  [1790, "절품"],
-  [1600, "상품"],
-  [820, "정품"],
+  [2060, "신품"],
+  [1985, "절품"],
+  [1785, "상품"],
+  [935, "정품"],
   [0, "범품"],
 ];
 /** 등급별 종료 보상: 수련 스탯 추가 비율, 스킬 업그레이드 확률, 필살기 업그레이드 확률 */

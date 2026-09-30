@@ -191,6 +191,8 @@ export interface CharacterDef {
   basicSkill: string;
   ultimates: [string, string];
   bond: string;
+  /** 수련 시작 자금 (기본 50, 부자 기믹 100~200, 거지 기믹 0) */
+  startSilver?: number;
   /** 고유 이벤트 3종 id */
   events: [string, string, string];
   intro: string;
