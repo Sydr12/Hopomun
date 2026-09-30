@@ -1,22 +1,21 @@
-"""육성(수련) 모드 GUI 화면."""
+"""강호육성기 GUI 화면."""
 from __future__ import annotations
 
 from typing import Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 import pygame
 
-from ..data.constants import INTERNAL_STATS, PHYSICAL_STATS
+from ..data.constants import ALL_STATS, INTERNAL_STATS, PHYSICAL_STATS
 from ..data.training_data import MAX_STAMINA, MOODS, TOTAL_TURNS, TRAININGS
 from ..models.character import Character
-from ..systems.recruitment import generate_candidates
+from ..systems.candidates import generate_candidates
 from ..systems.training import ARTS_BY_ID, ActionResult, TournamentResult, TrainingSession
 from . import common
-from .screens import ScreenBase
+from .app import ScreenBase
 
 if TYPE_CHECKING:
     from .app import GameApp
 
-ALL_STATS = PHYSICAL_STATS + INTERNAL_STATS
 STAT_BAR_MAX = 600
 MOOD_COLORS = [(150, 70, 200), (90, 120, 200), (200, 200, 200), (240, 170, 60), (240, 90, 90)]
 GREEN = (110, 210, 120)
@@ -25,10 +24,8 @@ MUTED = (160, 170, 180)
 MODAL_BG = (24, 28, 36)
 
 
-def _back_to_clan(app: "GameApp") -> None:
-    from .screens import ClanManagementScreen
-
-    app.change_screen(ClanManagementScreen())
+def _to_title(app: "GameApp") -> None:
+    app.change_screen(TitleScreen())
 
 
 class Button:
@@ -66,87 +63,136 @@ class Button:
 
 
 # ---------------------------------------------------------------------------
-# 제자 선택
+# 타이틀 · 제자 선택
 # ---------------------------------------------------------------------------
+class TitleScreen(ScreenBase):
+    """시작 화면과 이번 실행에서 키운 제자들(명예의 전당)."""
+
+    def __init__(self) -> None:
+        self.title_font = common.load_brush_font(130)
+        self.sub_font = common.load_brush_font(44)
+        self.font = common.load_font(20)
+        self.small = common.load_font(16)
+        self.buttons: List[Button] = []
+
+    def enter(self, app: "GameApp") -> None:
+        cx = common.SCREEN_SIZE[0] // 2
+        self.buttons = [
+            Button(pygame.Rect(cx - 130, 380, 260, 56), "새 제자 받기", lambda: app.change_screen(DiscipleSelectScreen())),
+            Button(pygame.Rect(cx - 130, 450, 260, 56), "종료", app.request_exit),
+        ]
+
+    def handle_event(self, event: pygame.event.Event, app: "GameApp") -> None:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for button in self.buttons:
+                if button.hit(event.pos):
+                    button.on_click()
+                    return
+        elif event.type == pygame.KEYDOWN:
+            if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                self.buttons[0].on_click()
+            elif event.key == pygame.K_ESCAPE:
+                app.request_exit()
+
+    def draw(self, surface: pygame.Surface, app: "GameApp") -> None:
+        surface.fill(common.BACKGROUND_COLOR)
+        cx = surface.get_width() // 2
+        title = self.title_font.render("강호육성기", True, common.ACCENT_COLOR)
+        surface.blit(title, title.get_rect(center=(cx, 170)))
+        sub = self.sub_font.render(f"{TOTAL_TURNS}개월, 한 명의 제자를 천하제일인으로", True, common.TEXT_COLOR)
+        surface.blit(sub, sub.get_rect(center=(cx, 290)))
+        for button in self.buttons:
+            button.draw(surface, self.font, self.small)
+
+        if app.hall_of_fame:
+            heading = self.small.render("명예의 전당", True, common.ACCENT_COLOR)
+            surface.blit(heading, (40, 540))
+            for i, disciple in enumerate(app.hall_of_fame[-4:][::-1]):
+                line = self.small.render(f"[{disciple.title}] {disciple.name} · 명성 {disciple.fame}",
+                                         True, common.TEXT_COLOR)
+                surface.blit(line, (40 + (i % 2) * 380, 566 + (i // 2) * 26))
+
+
 class DiscipleSelectScreen(ScreenBase):
-    """육성할 제자를 고른다. 문파원이 없으면 새로 들일 후보를 보여준다."""
+    """입문을 청한 후보 3명 중 한 명을 제자로 받는다."""
 
     CARD_W = 340
     CARD_H = 300
+    MAX_REROLLS = 3
 
     def __init__(self) -> None:
         self.title_font = common.load_font(40)
         self.font = common.load_font(20)
         self.small = common.load_font(16)
         self.choices: List[Character] = []
-        self.from_clan = False
         self.cards: List[pygame.Rect] = []
-        self.back = Button(pygame.Rect(30, common.SCREEN_SIZE[1] - 70, 130, 46), "뒤로", lambda: None)
+        self.rerolls_left = self.MAX_REROLLS
+        self.buttons: List[Button] = []
 
     def enter(self, app: "GameApp") -> None:
-        members = list(app.clan.members) if app.clan else []
-        self.from_clan = bool(members)
-        self.choices = members[:6] if members else generate_candidates(3)
-        self.back.on_click = lambda: _back_to_clan(app)
-        columns = min(3, len(self.choices))
-        width = columns * self.CARD_W + (columns - 1) * 24
-        start_x = (common.SCREEN_SIZE[0] - width) // 2
-        rows = (len(self.choices) + 2) // 3
-        card_h = self.CARD_H if rows == 1 else 220
-        self.cards = [
-            pygame.Rect(start_x + (i % 3) * (self.CARD_W + 24), 150 + (i // 3) * (card_h + 16), self.CARD_W, card_h)
-            for i in range(len(self.choices))
+        self.choices = generate_candidates(3)
+        start_x = (common.SCREEN_SIZE[0] - (3 * self.CARD_W + 2 * 24)) // 2
+        self.cards = [pygame.Rect(start_x + i * (self.CARD_W + 24), 150, self.CARD_W, self.CARD_H) for i in range(3)]
+        bottom = common.SCREEN_SIZE[1] - 80
+        self.buttons = [
+            Button(pygame.Rect(30, bottom, 130, 50), "뒤로", lambda: app.change_screen(TitleScreen())),
+            Button(pygame.Rect(common.SCREEN_SIZE[0] - 250, bottom, 220, 50), "", self._reroll),
         ]
+        self._refresh_reroll()
+
+    def _refresh_reroll(self) -> None:
+        button = self.buttons[1]
+        button.label = f"다른 후보 보기 ({self.rerolls_left})"
+        button.enabled = self.rerolls_left > 0
+
+    def _reroll(self) -> None:
+        self.rerolls_left -= 1
+        self.choices = generate_candidates(3)
+        self._refresh_reroll()
 
     def handle_event(self, event: pygame.event.Event, app: "GameApp") -> None:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            _back_to_clan(app)
+            app.change_screen(TitleScreen())
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.back.hit(event.pos):
-                self.back.on_click()
-                return
+            for button in self.buttons:
+                if button.hit(event.pos):
+                    button.on_click()
+                    return
             for character, rect in zip(self.choices, self.cards):
                 if rect.collidepoint(event.pos):
-                    if not self.from_clan and app.clan:
-                        app.clan.add_member(character)
                     app.change_screen(TrainingScreen(character))
                     return
 
-    def update(self, dt: float, app: "GameApp") -> None:
-        del dt, app
-
     def draw(self, surface: pygame.Surface, app: "GameApp") -> None:
         surface.fill(common.BACKGROUND_COLOR)
-        title = self.title_font.render("수련할 제자 선택", True, common.ACCENT_COLOR)
+        title = self.title_font.render("입문 제자 선택", True, common.ACCENT_COLOR)
         surface.blit(title, title.get_rect(center=(surface.get_width() // 2, 60)))
-        guide = (f"{TOTAL_TURNS}개월(3년) 동안 제자를 수련시켜 천하제일 비무대회에 도전합니다."
-                 if self.from_clan else
-                 "문파에 제자가 없습니다. 입문을 청한 이들 중 한 명을 받아들여 수련을 시작하세요.")
-        text = self.font.render(guide, True, common.TEXT_COLOR)
-        surface.blit(text, text.get_rect(center=(surface.get_width() // 2, 108)))
+        guide = self.font.render("문하에 들기를 청하는 이들이 찾아왔습니다. 한 명을 제자로 받아 수련을 시작하세요.",
+                                 True, common.TEXT_COLOR)
+        surface.blit(guide, guide.get_rect(center=(surface.get_width() // 2, 108)))
 
         mouse = pygame.mouse.get_pos()
         for character, rect in zip(self.choices, self.cards):
             hovered = rect.collidepoint(mouse)
             pygame.draw.rect(surface, common.PANEL_COLOR, rect, border_radius=12)
             pygame.draw.rect(surface, common.ACCENT_COLOR if hovered else common.SLATE, rect, width=2, border_radius=12)
-            header = f"[{character.title}] " if character.title else ""
-            name = self.font.render(f"{header}{character.name}", True, common.ACCENT_COLOR)
+            name = self.font.render(character.name, True, common.ACCENT_COLOR)
             surface.blit(name, (rect.left + 16, rect.top + 14))
-            info = self.small.render(
-                f"{character.gender} · {character.age}세 · {character.weapon} · 성장 {character.growth_tier}",
-                True, common.TEXT_COLOR)
+            tier = self.font.render(f"성장 {character.growth_tier}", True, common.TEXT_COLOR)
+            surface.blit(tier, tier.get_rect(topright=(rect.right - 16, rect.top + 14)))
+            info = self.small.render(f"{character.gender} · {character.age}세 · {character.weapon}", True, common.TEXT_COLOR)
             surface.blit(info, (rect.left + 16, rect.top + 44))
-            stats = character.all_stats
+            origin = self.small.render(character.origin, True, MUTED)
+            surface.blit(origin, (rect.left + 16, rect.top + 66))
             for i, key in enumerate(ALL_STATS):
                 col, row = i % 2, i // 2
-                line = self.small.render(f"{key} {stats.get(key, 0)}", True, common.TEXT_COLOR)
-                surface.blit(line, (rect.left + 16 + col * 150, rect.top + 76 + row * 24))
-            hint = self.small.render("클릭하여 수련 시작", True, MUTED)
+                line = self.small.render(f"{key} {character.stats.get(key, 0)}", True, common.TEXT_COLOR)
+                surface.blit(line, (rect.left + 16 + col * 150, rect.top + 100 + row * 26))
+            hint = self.small.render("클릭하여 제자로 받기", True, MUTED)
             surface.blit(hint, hint.get_rect(midbottom=(rect.centerx, rect.bottom - 12)))
 
-        self.back.draw(surface, self.font, self.small)
-
+        for button in self.buttons:
+            button.draw(surface, self.font, self.small)
 
 # ---------------------------------------------------------------------------
 # 모달
@@ -335,7 +381,7 @@ class EndingModal(Modal):
         self.session = session
         self.rank_font = common.load_brush_font(110)
         self.buttons = [Button(pygame.Rect(self.rect.centerx - 110, self.rect.bottom - 62, 220, 44),
-                               "문파로 돌아가기", on_close)]
+                               "처음 화면으로", on_close)]
 
     def draw(self, surface: pygame.Surface) -> None:
         ending = self.session.ending
@@ -433,7 +479,7 @@ class TrainingScreen(ScreenBase):
             ("유람", "심경 상승 · 기력 +15", lambda: self._do(s.outing)),
             ("비무", "강호 무인과 대련", lambda: self._do(s.spar)),
             ("무공 습득", f"깨달음 {s.insight}", self._open_arts),
-            ("중단", "문파로 돌아가기", self._quit),
+            ("포기", "수련을 그만둔다", self._quit),
         ]
         for i, (label, sub, callback) in enumerate(extra):
             rect = pygame.Rect(start_x + i * (width + gap), row2, width, height)
@@ -476,15 +522,15 @@ class TrainingScreen(ScreenBase):
 
     def _quit(self) -> None:
         if self.app:
-            self.app.set_toast("수련을 중단했습니다. 성장한 능력치는 유지됩니다.")
-            self.session.apply_to_character()
-            _back_to_clan(self.app)
+            self.app.set_toast(f"{self.character.name}은(는) 수련을 그만두고 하산했습니다.")
+            _to_title(self.app)
 
     def _finish(self) -> None:
         self.session.apply_to_character()
         if self.app:
+            self.app.hall_of_fame.append(self.character)
             self.app.set_toast(f"{self.character.name}이(가) [{self.character.title}]의 칭호를 얻었습니다.")
-            _back_to_clan(self.app)
+            _to_title(self.app)
 
     # -------------------------------------------------------------- 그리기
     def draw(self, surface: pygame.Surface, app: "GameApp") -> None:

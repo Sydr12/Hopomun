@@ -1,12 +1,13 @@
-"""육성 모드 로직 테스트."""
+"""강호육성기 로직 테스트."""
 import random
 
 import pytest
 
-from hopomun.data.training_data import MAX_STAT, TOTAL_TURNS, TOURNAMENTS, TRAININGS
-from hopomun.models.character import Character
-from hopomun.systems.combat import Fighter, simulate_duel
-from hopomun.systems.training import TrainingSession
+from gangho.data.constants import ALL_STATS
+from gangho.data.training_data import MAX_STAT, TOTAL_TURNS, TOURNAMENTS, TRAININGS
+from gangho.models.character import Character
+from gangho.systems.combat import Fighter, simulate_duel
+from gangho.systems.training import TrainingSession
 
 
 def make_character(**overrides) -> Character:
@@ -15,8 +16,7 @@ def make_character(**overrides) -> Character:
         age=18,
         gender="남성",
         weapon="검",
-        physical_stats={"위력": 50, "신속": 50, "급소": 50, "혈맥": 50},
-        internal_stats={"불굴": 50, "심체": 50, "회피": 50, "집중": 50},
+        stats={key: 50 for key in ALL_STATS},
         growth_tier="B",
     )
     base.update(overrides)
@@ -85,7 +85,7 @@ def test_tournament_turn_blocks_regular_actions():
 
 def test_pending_event_must_be_resolved_first():
     session = TrainingSession(make_character(), random.Random(4))
-    from hopomun.data.training_data import EVENTS
+    from gangho.data.training_data import EVENTS
     session.pending_event = EVENTS[0]
     with pytest.raises(RuntimeError):
         session.rest()
@@ -114,7 +114,7 @@ def test_full_run_reaches_ending(seed):
     character = session.apply_to_character()
     assert character.title == session.ending.title
     assert character.age == 21
-    assert character.all_stats == session.stats
+    assert character.stats == session.stats
 
 
 def test_stronger_fighter_usually_wins():
@@ -126,3 +126,11 @@ def test_stronger_fighter_usually_wins():
         for _ in range(50)
     )
     assert wins >= 48
+
+
+def test_candidates_are_complete():
+    from gangho.systems.candidates import generate_candidates
+
+    for candidate in generate_candidates(20, random.Random(9)):
+        assert set(candidate.stats) == set(ALL_STATS)
+        assert candidate.name and candidate.origin

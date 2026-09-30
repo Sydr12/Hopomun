@@ -5,7 +5,6 @@ from .screens.start_screen import StartScreen
 from .screens.clan_selection import ClanSelectionScreen
 from .screens.clan_management import ClanManagementScreen
 from .screens.recruitment_screen import RecruitmentScreen
-from .screens.training_screen import TrainingScreen
 
 
 def main() -> None:
@@ -17,15 +16,12 @@ def main() -> None:
 
     management_screen = ClanManagementScreen()
     recruitment_screen = RecruitmentScreen()
-    training_screen = TrainingScreen()
 
     while True:
         choice = management_screen.choose_system(clan)
-        if choice == "등용문":
+        if choice == "Recruitment":
             recruitment_screen.recruit_member(clan)
-        elif choice == "수련":
-            training_screen.run(clan)
-        elif choice == "종료":
+        elif choice == "Exit":
             print("Farewell, grand master.")
             break
         else:

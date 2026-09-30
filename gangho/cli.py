@@ -1,28 +1,25 @@
-"""CLI 육성(수련) 화면."""
+"""강호육성기 텍스트 모드."""
 from __future__ import annotations
 
 from typing import List
 
-from ..data.training_data import TOTAL_TURNS, TRAININGS
-from ..models.clan import Clan
-from ..systems.recruitment import generate_candidates
-from ..systems.training import ARTS_BY_ID, ActionResult, TrainingSession
+from .data.training_data import TOTAL_TURNS, TRAININGS
+from .systems.candidates import generate_candidates
+from .systems.training import ARTS_BY_ID, ActionResult, TrainingSession
 
 
-class TrainingScreen:
+class TrainingCli:
     """텍스트 기반 육성 흐름."""
 
-    def run(self, clan: Clan) -> None:
-        if not clan.members:
-            print("\n문파에 제자가 없습니다. 입문을 청한 이들 중 한 명을 받아들이세요.")
-            candidates = generate_candidates()
-            for idx, candidate in enumerate(candidates, start=1):
-                print(f"-- {idx} --\n{candidate.describe()}")
-            clan.add_member(candidates[self._ask("받아들일 제자", len(candidates)) - 1])
-
-        for idx, member in enumerate(clan.members, start=1):
-            print(f"-- {idx} --\n{member.describe()}")
-        character = clan.members[self._ask("수련시킬 제자", len(clan.members)) - 1]
+    def run(self) -> None:
+        print("=" * 60)
+        print("                    강호육성기")
+        print("=" * 60)
+        print("문하에 들기를 청하는 이들이 찾아왔습니다.")
+        candidates = generate_candidates()
+        for idx, candidate in enumerate(candidates, start=1):
+            print(f"-- {idx} --\n{candidate.describe()}")
+        character = candidates[self._ask("제자로 받을 후보", len(candidates)) - 1]
         session = TrainingSession(character)
         print(f"\n{character.name}의 {TOTAL_TURNS}개월 수련이 시작됩니다.\n")
 
@@ -117,3 +114,11 @@ class TrainingScreen:
             if raw.isdigit() and 1 <= int(raw) <= max_index:
                 return int(raw)
             print("올바른 번호를 입력해주세요.")
+
+
+def main() -> None:
+    TrainingCli().run()
+
+
+if __name__ == "__main__":
+    main()

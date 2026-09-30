@@ -9,7 +9,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
-from ..data.constants import INTERNAL_STATS, PHYSICAL_STATS
+from ..data.constants import ALL_STATS
 from ..data.training_data import (
     DEFAULT_MOOD,
     EVENT_CHANCE,
@@ -36,7 +36,6 @@ from ..data.training_data import (
 from ..models.character import Character
 from .combat import Fighter, generate_opponent, simulate_duel
 
-ALL_STATS = PHYSICAL_STATS + INTERNAL_STATS
 TRAININGS_BY_ID = {t["id"]: t for t in TRAININGS}
 ARTS_BY_ID = {a["id"]: a for a in MARTIAL_ARTS}
 
@@ -85,7 +84,7 @@ class TrainingSession:
         self.character = character
         self.rng = rng or random.Random()
         self.turn = 1
-        self.stats: Dict[str, int] = {key: character.all_stats.get(key, 0) for key in ALL_STATS}
+        self.stats: Dict[str, int] = {key: character.stats.get(key, 0) for key in ALL_STATS}
         self.stamina = MAX_STAMINA
         self.mood = DEFAULT_MOOD
         self.injured = False
@@ -444,8 +443,7 @@ class TrainingSession:
     def apply_to_character(self) -> Character:
         """육성 결과를 원래 인물에 반영한다."""
         char = self.character
-        char.physical_stats = {key: self.stats[key] for key in PHYSICAL_STATS}
-        char.internal_stats = {key: self.stats[key] for key in INTERNAL_STATS}
+        char.stats = dict(self.stats)
         char.arts = list(self.arts)
         char.fame = self.fame
         char.age = self.age

@@ -5,7 +5,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence
 
-from ..data.constants import INTERNAL_STATS, PHYSICAL_STATS, WEAPON_STRENGTHS, WEAPONS
+from ..data.constants import ALL_STATS, WEAPON_STRENGTHS, WEAPONS
 from ..data.training_data import MARTIAL_ARTS, OPPONENT_TITLES
 
 ARTS_BY_ID = {art["id"]: art for art in MARTIAL_ARTS}
@@ -126,7 +126,7 @@ def simulate_duel(player: Fighter, opponent: Fighter, rng: Optional[random.Rando
 def generate_opponent(power: int, rng: Optional[random.Random] = None, art_count: int = 0) -> Fighter:
     """주어진 평균 능력치 수준의 상대를 만든다."""
     rng = rng or random.Random()
-    stats = {key: max(1, int(power * rng.uniform(0.75, 1.25))) for key in PHYSICAL_STATS + INTERNAL_STATS}
+    stats = {key: max(1, int(power * rng.uniform(0.75, 1.25))) for key in ALL_STATS}
     weapon = rng.choice(WEAPONS)
     candidates = [a["id"] for a in MARTIAL_ARTS if a.get("weapon") in (None, weapon)]
     arts = rng.sample(candidates, k=min(art_count, len(candidates)))
