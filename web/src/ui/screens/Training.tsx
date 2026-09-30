@@ -208,7 +208,7 @@ export function TrainingScreen({ state, mutate, onExit }: { state: TrainingState
                   </div>
                   <div class="col" style={{ alignItems: "flex-end", gap: 2 }}>
                     <span class="tiny" style={{ color: t.stamina > 0 ? "var(--green)" : "var(--text-dim)" }}>기력 {t.stamina > 0 ? "+" : ""}{t.stamina}</span>
-                    <span class="risk" style={{ color: risk === 0 ? "var(--text-faint)" : risk < 0.25 ? "#e2b04f" : "var(--red)" }}>
+                    <span class="risk" style={{ color: risk === 0 ? "var(--text-faint)" : risk < 0.25 ? "var(--gold)" : "var(--red)" }}>
                       {risk === 0 ? "안전" : `실패 ${Math.round(risk * 100)}%`}
                     </span>
                   </div>

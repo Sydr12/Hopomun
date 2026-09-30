@@ -24,7 +24,7 @@ export const TRAINING_GLYPH: Record<string, { ch: string; color: string }> = {
 };
 
 export function Glyph({ ch, color }: { ch: string; color: string }) {
-  return <span class="glyph" style={{ background: color }}>{ch}</span>;
+  return <span class="glyph" style={{ color }}>{ch}</span>;
 }
 
 export function Portrait({ name, color, size, image }: { name: string; color: string; size?: number; image?: string }) {
@@ -32,8 +32,8 @@ export function Portrait({ name, color, size, image }: { name: string; color: st
   return (
     <div style={{
       width: s, height: s, borderRadius: s / 4, flexShrink: 0, display: "grid", placeItems: "center", position: "relative", overflow: "hidden",
-      background: `linear-gradient(160deg, ${color}, #241d19)`, fontFamily: "var(--serif)", fontWeight: 900, fontSize: s * 0.42, color: "rgba(0,0,0,.5)",
-      border: "1px solid var(--line-2)",
+      background: "rgba(0,0,0,.6)", fontFamily: "var(--serif)", fontWeight: 900, fontSize: s * 0.42, color,
+      border: `1.5px solid ${color}`, boxShadow: `0 0 12px -2px ${color}, inset 0 0 12px -6px ${color}`, textShadow: `0 0 8px ${color}`,
     }}>
       {name.slice(0, 1)}
       {image && <img src={image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
@@ -56,7 +56,7 @@ export function Bar({ value, max, color, ghost, lg }: { value: number; max: numb
 }
 
 export function staminaColor(v: number): string {
-  return v >= 50 ? "var(--green)" : v >= 30 ? "#e2b04f" : "var(--red)";
+  return v >= 50 ? "var(--green)" : v >= 30 ? "var(--gold)" : "var(--red)";
 }
 
 /** 기력 막대. preview가 있으면 "현재 → 예상"을 함께 보여준다. */
@@ -130,7 +130,7 @@ export function Gains({ gains, mult }: { gains: Partial<Stats>; mult?: string })
           <span class="small">{STAT_NAMES[k]}</span> {gains[k]! > 0 ? "+" : ""}{gains[k]}
         </span>
       ))}
-      {mult && <span class="gain-chip gold" style={{ color: "var(--gold)" }}>{mult}</span>}
+      {mult && <span class="gain-chip" style={{ color: "var(--gold)" }}>{mult}</span>}
     </div>
   );
 }

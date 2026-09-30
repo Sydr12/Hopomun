@@ -21,21 +21,21 @@ interface FxSpec { kind: FxKind; color: string; travel: boolean; count: number }
 
 /** 스킬 → 이펙트 종류 */
 function fxFor(event: BattleEvent, actor: UnitSummary | undefined): FxSpec {
-  if (event.kind === "counter") return { kind: "slash", color: "#ffe0b0", travel: false, count: 1 };
-  if (event.kind === "dot") return { kind: "rise", color: "#9fdc7a", travel: false, count: 3 };
+  if (event.kind === "counter") return { kind: "slash", color: "#e8fffb", travel: false, count: 1 };
+  if (event.kind === "dot") return { kind: "rise", color: "#b6ff3b", travel: false, count: 3 };
   const def = event.skill ? SKILLS[event.skill] : undefined;
   const tags = def?.tags ?? [];
   const hits = def?.type === "active" ? Math.min(6, Math.max(...def.effects.map((e) => (e.kind === "damage" ? e.hits ?? 1 : 1)))) : 1;
   const range = def?.type === "active" ? def.range : "single";
   if (range === "self" || range === "allies" || range === "ally_lowest" || range === "ally_cc") {
-    return tags.includes("heal") ? { kind: "rise", color: "#8fd08a", travel: false, count: 5 } : { kind: "ring", color: "#e0bd6f", travel: false, count: 1 };
+    return tags.includes("heal") ? { kind: "rise", color: "#6dff9e", travel: false, count: 5 } : { kind: "ring", color: "#ffd84a", travel: false, count: 1 };
   }
-  if (tags.includes("freeze")) return { kind: "shard", color: "#9fd4ff", travel: true, count: Math.max(1, hits) };
-  if (tags.includes("poison")) return { kind: "needle", color: "#bfe3a0", travel: true, count: Math.max(1, hits) };
-  if (tags.includes("blood")) return { kind: "slash", color: "#ff5a5a", travel: false, count: 1 };
-  if (tags.includes("taunt")) return { kind: "ring", color: "#ff9d5c", travel: false, count: 1 };
-  if (actor?.attackType === "inner") return { kind: "orb", color: "#a29df0", travel: true, count: Math.min(3, hits) };
-  return hits > 1 ? { kind: "slash", color: "#ffd9b0", travel: false, count: Math.min(3, hits) } : { kind: "slash", color: "#ffd9b0", travel: false, count: 1 };
+  if (tags.includes("freeze")) return { kind: "shard", color: "#7fe8ff", travel: true, count: Math.max(1, hits) };
+  if (tags.includes("poison")) return { kind: "needle", color: "#c8ff3d", travel: true, count: Math.max(1, hits) };
+  if (tags.includes("blood")) return { kind: "slash", color: "#ff3d71", travel: false, count: 1 };
+  if (tags.includes("taunt")) return { kind: "ring", color: "#ff8a4c", travel: false, count: 1 };
+  if (actor?.attackType === "inner") return { kind: "orb", color: "#b18cff", travel: true, count: Math.min(3, hits) };
+  return hits > 1 ? { kind: "slash", color: "#2ff3e0", travel: false, count: Math.min(3, hits) } : { kind: "slash", color: "#2ff3e0", travel: false, count: 1 };
 }
 
 /** 로그 한 줄 (수치 포함) */

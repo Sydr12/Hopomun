@@ -4,7 +4,7 @@ import type { Shimdeuk } from "../../core/types";
 import { STAT_KEYS, STAT_NAMES } from "../../core/types";
 import { CharacterPortrait, GradeBadge, skillName } from "../components";
 
-const GRADE_COLORS: Record<string, string> = { 범품: "#8a8178", 정품: "#7ea6c9", 상품: "#7fb77e", 절품: "#b48be0", 신품: "#d4af5f" };
+const GRADE_COLORS: Record<string, string> = { 범품: "#8a9a97", 정품: "var(--neon)", 상품: "var(--green)", 절품: "var(--neon-2)", 신품: "var(--gold)" };
 
 export function ShimdeukSkillsView({ shimdeuk }: { shimdeuk: Shimdeuk }) {
   const c = getCharacter(shimdeuk.characterId);
