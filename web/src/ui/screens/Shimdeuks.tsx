@@ -20,7 +20,7 @@ export function ShimdeukListScreen({ shimdeuks, onBack, onDelete }: { shimdeuks:
         return (
           <div class="card col" key={s.id}>
             <div class="row" style={{ gap: 10 }}>
-              <CharacterPortrait character={c} size="sm" />
+              <CharacterPortrait character={c} size={36} />
               <div class="grow">
                 <b>{s.name}</b>
                 <div class="small dim">{c.name} · {s.grade} · {s.score}점</div>

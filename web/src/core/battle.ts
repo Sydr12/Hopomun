@@ -67,7 +67,10 @@ export interface BattleEvent {
 
 export interface UnitSummary {
   uid: string;
+  id: string;
   name: string;
+  attackType: AttackType;
+  isBoss: boolean;
   side: 0 | 1;
   maxHp: number;
   hp: number;
@@ -269,7 +272,7 @@ export class Battle {
       timeout,
       actions,
       events: this.events,
-      units: this.units.map((u) => ({ uid: u.uid, name: u.name, side: u.side, maxHp: u.maxHp, hp: Math.max(0, Math.round(u.hp)), pos: u.pos })),
+      units: this.units.map((u) => ({ uid: u.uid, id: u.spec.id, name: u.name, attackType: u.spec.attackType, isBoss: !!u.spec.isBoss, side: u.side, maxHp: u.maxHp, hp: Math.max(0, Math.round(u.hp)), pos: u.pos })),
     };
   }
 

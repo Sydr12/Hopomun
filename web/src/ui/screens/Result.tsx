@@ -42,8 +42,8 @@ export function ResultScreen({ shimdeuk, stored, onDone }: { shimdeuk: Shimdeuk;
   return (
     <div class="screen">
       <p class="dim small" style={{ margin: 0, textAlign: "center" }}>수련 종료</p>
-      <div class="panel col" style={{ alignItems: "center", textAlign: "center", borderColor: color }}>
-        <CharacterPortrait character={c} size="lg" />
+      <div class="card col" style={{ alignItems: "center", textAlign: "center", borderColor: color }}>
+        <CharacterPortrait character={c} size={88} />
         <h1 style={{ color }}>{shimdeuk.name}</h1>
         <div class="row" style={{ justifyContent: "center" }}>
           <span class="chip" style={{ color, borderColor: color, fontSize: 16, padding: "2px 14px" }}>{shimdeuk.grade}</span>
@@ -53,7 +53,7 @@ export function ResultScreen({ shimdeuk, stored, onDone }: { shimdeuk: Shimdeuk;
           {c.name} · 보스 {shimdeuk.bossesDefeated}/4 격파 · 최종 시험 {shimdeuk.finalTest === "win" ? "통과" : shimdeuk.finalTest === "lose" ? "실패" : "미응시"}
         </p>
       </div>
-      <div class="panel col">
+      <div class="card col">
         <h3>수련 스탯</h3>
         <div class="row wrap" style={{ gap: 14 }}>
           {STAT_KEYS.map((k) => (
@@ -63,14 +63,14 @@ export function ResultScreen({ shimdeuk, stored, onDone }: { shimdeuk: Shimdeuk;
           ))}
         </div>
       </div>
-      <div class="panel col">
+      <div class="card col">
         <h3>스킬</h3>
         <ShimdeukSkillsView shimdeuk={shimdeuk} />
       </div>
       <p class="small dim" style={{ textAlign: "center", margin: 0 }}>
         {stored ? "심득 보관함에 저장되었습니다." : "보관함이 가득 찼습니다 (캐릭터당 5개). 보관함에서 정리한 뒤 다시 수련하세요."}
       </p>
-      <div class="action-bar single">
+      <div class="bottom-bar">
         <button class="btn primary" onClick={onDone}>처음으로</button>
       </div>
     </div>
