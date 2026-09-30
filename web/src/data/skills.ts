@@ -81,7 +81,7 @@ export const POOL_PASSIVES: PassiveSkillDef[] = [
 /** 캐릭터 고유 기본 액티브 (쿨타임 0) */
 export const BASIC_SKILLS: ActiveSkillDef[] = [
   { id: "b_bichim", name: "비침삼연", type: "active", affinity: "common", tags: ["multi", "poison"], cooldown: 0, range: "single",
-    effects: [{ kind: "damage", power: 0.3, hits: 3 }], desc: "독침 세 발" },
+    effects: [{ kind: "damage", power: 0.24, hits: 3 }], desc: "독침 세 발" },
   { id: "b_ilgeom", name: "일검삼영", type: "active", affinity: "common", tags: ["multi"], cooldown: 0, range: "single",
     effects: [{ kind: "damage", power: 0.3, hits: 3 }], desc: "눈에 보이지 않는 세 번의 베기" },
   { id: "b_nahan", name: "나한권", type: "active", affinity: "common", tags: ["taunt"], cooldown: 0, range: "single",

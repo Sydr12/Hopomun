@@ -8,7 +8,7 @@ export const CHARACTERS: CharacterDef[] = [
   {
     id: "dang_soha", name: "당소하", faction: "sega", sect: "사천당가", attackType: "outer",
     baseStats: { outer: 70, inner: 30, guard: 42, vital: 52 },
-    trainingStart: { outer: 34, inner: 12, guard: 20, vital: 24 },
+    trainingStart: { outer: 30, inner: 12, guard: 20, vital: 24 },
     agility: 118, trait: "poison_hand", basicSkill: "b_bichim",
     ultimates: ["u_mancheon", "u_sanhwa"], bond: "seol_hwa",
     events: ["ev_dang_1", "ev_dang_2", "ev_dang_3"],
@@ -17,7 +17,7 @@ export const CHARACTERS: CharacterDef[] = [
   {
     id: "namgung_hyeon", name: "남궁현", faction: "sega", sect: "남궁세가", attackType: "outer",
     baseStats: { outer: 88, inner: 35, guard: 50, vital: 60 },
-    trainingStart: { outer: 38, inner: 14, guard: 22, vital: 26 },
+    trainingStart: { outer: 33, inner: 14, guard: 22, vital: 25 },
     agility: 108, trait: "swift_blade", basicSkill: "b_ilgeom", startSilver: 180,
     ultimates: ["u_changgung", "u_jewang"], bond: "hyeol_yeong",
     events: ["ev_nam_1", "ev_nam_2", "ev_nam_3"],
@@ -35,7 +35,7 @@ export const CHARACTERS: CharacterDef[] = [
   {
     id: "seol_hwa", name: "설화", faction: "saeoe", sect: "북해빙궁", attackType: "inner",
     baseStats: { outer: 28, inner: 88, guard: 50, vital: 66 },
-    trainingStart: { outer: 10, inner: 36, guard: 22, vital: 24 },
+    trainingStart: { outer: 10, inner: 38, guard: 26, vital: 30 },
     agility: 112, trait: "frost", basicSkill: "b_hanbing",
     ultimates: ["u_bingbaek", "u_seolhwa"], bond: "dang_soha",
     events: ["ev_seol_1", "ev_seol_2", "ev_seol_3"],
@@ -44,7 +44,7 @@ export const CHARACTERS: CharacterDef[] = [
   {
     id: "hyeol_yeong", name: "혈영", faction: "magyo", sect: "혈교", attackType: "inner",
     baseStats: { outer: 35, inner: 86, guard: 40, vital: 72 },
-    trainingStart: { outer: 12, inner: 38, guard: 18, vital: 32 },
+    trainingStart: { outer: 12, inner: 40, guard: 24, vital: 38 },
     agility: 104, trait: "blood_art", basicSkill: "b_hyeoljo", startSilver: 0,
     ultimates: ["u_hyeolma", "u_hyeolhae"], bond: "namgung_hyeon",
     events: ["ev_hyeol_1", "ev_hyeol_2", "ev_hyeol_3"],
@@ -62,7 +62,7 @@ export const CHARACTERS: CharacterDef[] = [
   {
     id: "dokgo_ung", name: "독고웅", faction: "sapa", sect: "녹림", attackType: "outer",
     baseStats: { outer: 100, inner: 25, guard: 66, vital: 94 },
-    trainingStart: { outer: 40, inner: 10, guard: 28, vital: 34 },
+    trainingStart: { outer: 58, inner: 10, guard: 38, vital: 50 },
     agility: 98, trait: "unshaken", basicSkill: "b_myeonggyeong",
     ultimates: ["u_cheongang", "u_paewang"], bond: "jegal_yun",
     events: ["ev_dokgo_1", "ev_dokgo_2", "ev_dokgo_3"],

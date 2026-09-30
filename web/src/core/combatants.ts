@@ -51,7 +51,13 @@ function slotLoadout(character: CharacterDef, skills: ShimdeukSkills, slot: Acti
 
 export interface CharacterBuild {
   characterId: string;
+  /** 수련 스탯 (진행 중인 수련 또는 적용한 심득) */
   trainingStats: Stats;
+  /**
+   * true: 수련 안의 전투 (보스 · 의뢰 · 최종 시험) → 수련 스탯만 쓴다.
+   * false/생략: 수련 밖 (팀전 등) → 기본 스탯 + 심득 수련 스탯.
+   */
+  inTraining?: boolean;
   skills: ShimdeukSkills;
   priority?: PriorityEntry[];
 }
@@ -75,7 +81,7 @@ export function characterCombatant(build: CharacterBuild, pos: Position = FRONT_
     id: character.id,
     name: character.name,
     attackType: character.attackType,
-    stats: addStats(character.baseStats, build.trainingStats),
+    stats: build.inTraining ? { ...build.trainingStats } : addStats(character.baseStats, build.trainingStats),
     agility: character.agility,
     trait: character.trait,
     faction: character.faction,

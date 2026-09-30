@@ -490,8 +490,9 @@ export function quest(state: TrainingState): ActionResult {
   return result;
 }
 
+/** 수련 중 전투: 기본 스탯은 더하지 않고 수련 스탯만 쓴다. */
 export function playerCombatant(state: TrainingState) {
-  return characterCombatant({ characterId: state.characterId, trainingStats: state.stats, skills: state.skills });
+  return characterCombatant({ characterId: state.characterId, trainingStats: state.stats, skills: state.skills, inTraining: true });
 }
 
 // ---------------------------------------------------------------- 보스

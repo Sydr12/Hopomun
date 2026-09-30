@@ -89,28 +89,33 @@ function useBump(value: number): boolean {
   return bump;
 }
 
-function StatLine({ k, total, training, unused, plus, max }: { k: StatKey; total: number; training: number; unused: boolean; plus?: number; max: number }) {
-  const bump = useBump(total);
+/** value = 수련 스탯 (수련 안의 전투는 이 값만 쓴다), base = 기본 스탯 (참고용) */
+function StatLine({ k, value, base, unused, plus, max }: { k: StatKey; value: number; base: number; unused: boolean; plus?: number; max: number }) {
+  const bump = useBump(value);
   return (
     <div class={`s ${unused ? "unused" : ""} ${bump ? "bump" : ""}`}>
       <i style={{ background: STAT_COLORS[k] }} />
       <span class="small">{STAT_NAMES[k]}</span>
-      <span class="v">{total}</span>
-      <Bar value={total} ghost={plus ? total + plus : undefined} max={max} color={STAT_COLORS[k]} />
-      {plus ? <span class="plus">+{plus}</span> : <span class="tiny faint" style={{ gridColumn: 3, justifySelf: "end", marginTop: -4 }}>수련 {training}</span>}
+      <span class="v">{value}</span>
+      <Bar value={value} ghost={plus ? value + plus : undefined} max={max} color={STAT_COLORS[k]} />
+      {plus ? <span class="plus">+{plus}</span> : <span class="tiny faint" style={{ gridColumn: 3, justifySelf: "end", marginTop: -4 }}>기본 {base}</span>}
     </div>
   );
 }
 
-/** 화면 한쪽에 떠 있는 능력치 */
+/**
+ * 화면 한쪽에 떠 있는 수련 스탯.
+ * 수련 안에서는 수련 스탯만 쓰고, 기본 스탯은 심득을 적용한 뒤(수련 밖)에 더해진다.
+ */
 export function StatFloater({ base, training, attackType, preview }: { base: Stats; training: Stats; attackType: "outer" | "inner"; preview?: Partial<Stats> }) {
-  const max = Math.max(250, ...STAT_KEYS.map((k) => base[k] + training[k] + (preview?.[k] ?? 0))) * 1.1;
+  const max = Math.max(150, ...STAT_KEYS.map((k) => training[k] + (preview?.[k] ?? 0))) * 1.15;
   const order: StatKey[] = [attackType, "guard", "vital", attackType === "outer" ? "inner" : "outer"];
   return (
     <div class="stat-float glass">
       {order.map((k) => (
-        <StatLine key={k} k={k} total={base[k] + training[k]} training={training[k]} unused={k !== attackType && (k === "outer" || k === "inner")} plus={preview?.[k]} max={max} />
+        <StatLine key={k} k={k} value={training[k]} base={base[k]} unused={k !== attackType && (k === "outer" || k === "inner")} plus={preview?.[k]} max={max} />
       ))}
+      <span class="tiny faint" style={{ textAlign: "center" }}>수련 스탯</span>
     </div>
   );
 }

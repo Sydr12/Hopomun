@@ -53,7 +53,7 @@ export function PickScreen({ candidates, onPick, onBack }: { candidates: string[
                 <div class="row wrap tiny" style={{ gap: 10 }}>
                   {STAT_KEYS.map((k) => (
                     <span key={k} class={(k === "outer" || k === "inner") && k !== c.attackType ? "faint" : ""}>
-                      {STAT_NAMES[k]} <b class="num">{c.baseStats[k]}</b><span class="faint"> +수련 {c.trainingStart[k]}</span>
+                      {STAT_NAMES[k]} <span class="faint">기본</span> <b class="num">{c.baseStats[k]}</b><span class="faint"> · 수련 시작</span> <b class="num gold">{c.trainingStart[k]}</b>
                     </span>
                   ))}
                 </div>

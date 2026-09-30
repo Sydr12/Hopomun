@@ -54,14 +54,17 @@ export function ResultScreen({ shimdeuk, stored, onDone }: { shimdeuk: Shimdeuk;
         </p>
       </div>
       <div class="card col">
-        <h3>수련 스탯</h3>
-        <div class="row wrap" style={{ gap: 14 }}>
+        <h3>심득 수련 스탯</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
           {STAT_KEYS.map((k) => (
-            <span key={k} class={(k === "outer" || k === "inner") && k !== c.attackType ? "faint" : ""}>
-              {STAT_NAMES[k]} <b>{shimdeuk.stats[k]}</b>
-            </span>
+            <div key={k} class={`col ${(k === "outer" || k === "inner") && k !== c.attackType ? "faint" : ""}`} style={{ gap: 0, alignItems: "center" }}>
+              <span class="tiny dim">{STAT_NAMES[k]}</span>
+              <b class="num" style={{ fontSize: 17 }}>{shimdeuk.stats[k]}</b>
+              <span class="tiny faint num">적용 시 {c.baseStats[k] + shimdeuk.stats[k]}</span>
+            </div>
           ))}
         </div>
+        <p class="tiny faint">심득을 적용하면 기본 스탯에 수련 스탯이 더해집니다 (팀전 등 수련 밖에서 적용).</p>
       </div>
       <div class="card col">
         <h3>스킬</h3>

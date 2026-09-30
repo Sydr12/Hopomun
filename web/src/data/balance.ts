@@ -83,16 +83,17 @@ export const EVOLVE_PRICE = 150;
 
 // ---------------------------------------------------------------- 보스 · 시험
 /**
- * 난이도별 기준 전투 스탯: 무난한 플레이(봇)가 그 보스 직전에 갖는 평균 (scripts/calib.ts 로 측정).
+ * 난이도별 기준 전투 스탯: 무난한 플레이(봇)가 그 보스 직전에 갖는 평균 "수련 스탯" (scripts/calib.ts 로 측정).
+ * 수련 안의 전투는 기본 스탯을 더하지 않으므로 수련 스탯만 기준으로 한다.
  * 보스 스탯 = 기준 × 보스 프로필 × 난이도 계수.
  */
 export const TIER_REFERENCE = [
-  { atk: 194, guard: 116, vital: 153 },
-  { atk: 305, guard: 174, vital: 232 },
-  { atk: 457, guard: 248, vital: 337 },
-  { atk: 654, guard: 347, vital: 475 },
+  { atk: 110, guard: 60, vital: 81 },
+  { atk: 215, guard: 116, vital: 157 },
+  { atk: 365, guard: 188, vital: 259 },
+  { atk: 558, guard: 286, vital: 395 },
 ];
-export const BOSS_DIFFICULTY = [0.72, 0.8, 0.73, 0.79];
+export const BOSS_DIFFICULTY = [0.74, 0.8, 0.74, 0.8];
 export const BOSS_STAT_REWARD = [12, 18, 26, 36];
 export const FINAL_WIN_STAT_REWARD = 40;
 export const FINAL_LOSE_STAT_REWARD = 15;

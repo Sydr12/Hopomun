@@ -4,9 +4,10 @@ import { CHARACTERS } from "../src/data/characters";
 import { getRegion, regionsOfTier } from "../src/data/regions";
 import { POOL_ACTIVES, POOL_PASSIVES } from "../src/data/skills";
 import { Rng } from "../src/core/rng";
-import { gradeOf, shimdeukName, storeShimdeuk, SHIMDEUK_SLOTS } from "../src/core/shimdeuk";
+import { buildFromShimdeuk, gradeOf, shimdeukName, storeShimdeuk, SHIMDEUK_SLOTS } from "../src/core/shimdeuk";
+import { characterCombatant } from "../src/core/combatants";
 import {
-  chooseRegion, chooseSkill, createTraining, failRate, fightBoss, rest, rollSkillCandidates, shopBuy, shopClose,
+  chooseRegion, chooseSkill, createTraining, failRate, fightBoss, playerCombatant, rest, rollSkillCandidates, shopBuy, shopClose,
   shopReroll, train, trainingLevel, type TrainingState,
 } from "../src/core/training";
 import type { Shimdeuk } from "../src/core/types";
@@ -193,6 +194,22 @@ describe("수련", () => {
       }
       expect(r.priority.at(-1)!.slot).toBe("basic");
     }
+  });
+});
+
+describe("기본 스탯과 수련 스탯", () => {
+  it("수련 안의 전투는 수련 스탯만 쓴다 (기본 스탯 미포함)", () => {
+    const state = createTraining("namgung_hyeon", 1);
+    const spec = playerCombatant(state);
+    expect(spec.stats).toEqual(CHARACTERS.find((c) => c.id === "namgung_hyeon")!.trainingStart);
+  });
+
+  it("심득을 적용하면 기본 스탯 + 심득 수련 스탯이 된다", () => {
+    const s = play("namgung_hyeon", 3);
+    const base = CHARACTERS.find((c) => c.id === "namgung_hyeon")!.baseStats;
+    const spec = characterCombatant(buildFromShimdeuk(s.result!));
+    expect(spec.stats.outer).toBe(base.outer + s.result!.stats.outer);
+    expect(spec.stats.vital).toBe(base.vital + s.result!.stats.vital);
   });
 });
 
