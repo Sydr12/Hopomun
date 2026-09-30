@@ -7,7 +7,7 @@ import type { CharacterDef } from "../core/types";
 export const CHARACTERS: CharacterDef[] = [
   {
     id: "dang_soha", name: "당소하", faction: "sega", sect: "사천당가", attackType: "outer",
-    baseStats: { outer: 78, inner: 30, guard: 45, vital: 55 },
+    baseStats: { outer: 70, inner: 30, guard: 42, vital: 52 },
     trainingStart: { outer: 34, inner: 12, guard: 20, vital: 24 },
     agility: 118, trait: "poison_hand", basicSkill: "b_bichim",
     ultimates: ["u_mancheon", "u_sanhwa"], bond: "seol_hwa",
@@ -34,7 +34,7 @@ export const CHARACTERS: CharacterDef[] = [
   },
   {
     id: "seol_hwa", name: "설화", faction: "saeoe", sect: "북해빙궁", attackType: "inner",
-    baseStats: { outer: 28, inner: 84, guard: 48, vital: 56 },
+    baseStats: { outer: 28, inner: 88, guard: 50, vital: 66 },
     trainingStart: { outer: 10, inner: 36, guard: 22, vital: 24 },
     agility: 112, trait: "frost", basicSkill: "b_hanbing",
     ultimates: ["u_bingbaek", "u_seolhwa"], bond: "dang_soha",
@@ -61,8 +61,8 @@ export const CHARACTERS: CharacterDef[] = [
   },
   {
     id: "dokgo_ung", name: "독고웅", faction: "sapa", sect: "녹림", attackType: "outer",
-    baseStats: { outer: 90, inner: 25, guard: 62, vital: 80 },
-    trainingStart: { outer: 36, inner: 10, guard: 28, vital: 32 },
+    baseStats: { outer: 100, inner: 25, guard: 66, vital: 94 },
+    trainingStart: { outer: 40, inner: 10, guard: 28, vital: 34 },
     agility: 98, trait: "unshaken", basicSkill: "b_myeonggyeong",
     ultimates: ["u_cheongang", "u_paewang"], bond: "jegal_yun",
     events: ["ev_dokgo_1", "ev_dokgo_2", "ev_dokgo_3"],
@@ -70,7 +70,7 @@ export const CHARACTERS: CharacterDef[] = [
   },
   {
     id: "jegal_yun", name: "제갈윤", faction: "sega", sect: "제갈세가", attackType: "inner",
-    baseStats: { outer: 25, inner: 82, guard: 52, vital: 62 },
+    baseStats: { outer: 25, inner: 90, guard: 54, vital: 70 },
     trainingStart: { outer: 10, inner: 36, guard: 24, vital: 28 },
     agility: 110, trait: "acupoint", basicSkill: "b_jeomhyeolji",
     ultimates: ["u_paljin", "u_cheongi"], bond: "dokgo_ung",

@@ -84,7 +84,7 @@ export const TIER_REFERENCE = [
   { atk: 402, guard: 221, vital: 297 },
   { atk: 565, guard: 297, vital: 407 },
 ];
-export const BOSS_DIFFICULTY = [0.8, 0.9, 0.84, 0.93];
+export const BOSS_DIFFICULTY = [0.78, 0.8, 0.73, 0.79];
 export const BOSS_STAT_REWARD = [12, 18, 26, 36];
 export const FINAL_WIN_STAT_REWARD = 40;
 export const FINAL_LOSE_STAT_REWARD = 15;
@@ -100,10 +100,10 @@ export const TAG_MATCH_WEIGHT = 2;
 // ---------------------------------------------------------------- 심득 평가
 /** 봇 기준 분포 목표: 범품 10% · 정품 25% · 상품 35% · 절품 22% · 신품 8% */
 export const GRADE_THRESHOLDS: [number, "범품" | "정품" | "상품" | "절품" | "신품"][] = [
-  [1840, "신품"],
-  [1630, "절품"],
-  [870, "상품"],
-  [450, "정품"],
+  [1860, "신품"],
+  [1790, "절품"],
+  [1600, "상품"],
+  [820, "정품"],
   [0, "범품"],
 ];
 /** 등급별 종료 보상: 수련 스탯 추가 비율, 스킬 업그레이드 확률, 필살기 업그레이드 확률 */

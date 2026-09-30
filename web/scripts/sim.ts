@@ -14,8 +14,10 @@ const pct = (n: number, d: number) => (d ? `${Math.round((n / d) * 100)}%`.padSt
 const TIERS = ["초급", "중급", "고급", "최고급"];
 
 console.log(`캐릭터당 ${RUNS}회\n`);
-console.log("캐릭터      보스 승률(도달 기준) 초급 중급 고급 최고급 | 시험 | 평균점수 | 등급 분포 범/정/상/절/신");
+console.log("캐릭터      보스 승률(도달 기준) 초급 중급 고급 최고급 | 완주 | 시험 | 평균점수 | 등급 분포 범/정/상/절/신");
 const gradeTotals: Record<string, number> = {};
+let totalRuns = 0;
+let totalClears = 0;
 for (const character of CHARACTERS) {
   const reach = [0, 0, 0, 0];
   const win = [0, 0, 0, 0];
@@ -32,6 +34,8 @@ for (const character of CHARACTERS) {
       if (s.bossesDefeated > t) win[t] += 1;
     }
     if (s.finalTest !== "none") finals += 1;
+    totalRuns += 1;
+    if (s.finalTest !== "none") totalClears += 1;
     if (s.finalTest === "win") finalWins += 1;
     scoreSum += r.score;
     grades[r.grade] += 1;
@@ -41,9 +45,10 @@ for (const character of CHARACTERS) {
   const bossRates = [0, 1, 2, 3].map((t) => pct(win[t], reach[t])).join(" ");
   const dist = Object.values(grades).map((g) => pct(g, RUNS)).join(" ");
   console.log(
-    `${character.name.padEnd(6)} ${getCharacter(character.id).attackType.padEnd(5)}            ${bossRates}   | ${pct(finalWins, finals)} | ${String(Math.round(scoreSum / RUNS)).padStart(6)}   | ${dist}`,
+    `${character.name.padEnd(6)} ${getCharacter(character.id).attackType.padEnd(5)}            ${bossRates}   | ${pct(finals, RUNS)} | ${pct(finalWins, finals)} | ${String(Math.round(scoreSum / RUNS)).padStart(6)}   | ${dist}`,
   );
   console.log(`      평균 수련 스탯: ${STAT_KEYS.map((k) => `${k} ${Math.round(statSum[k] / RUNS)}`).join(", ")}`);
 }
-console.log(`\n전체 등급 분포: ${JSON.stringify(gradeTotals)}`);
+console.log(`\n전체 완주율(보스 4명 격파 → 최종 시험 도달): ${pct(totalClears, totalRuns)}`);
+console.log(`전체 등급 분포: ${JSON.stringify(gradeTotals)}`);
 console.log(`(참고) 훈련 종류: ${TRAININGS.map((t) => t.name).join(", ")} / 난이도: ${TIERS.join(", ")}`);
