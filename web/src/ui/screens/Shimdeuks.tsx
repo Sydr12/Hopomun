@@ -1,0 +1,36 @@
+import { getCharacter } from "../../data/characters";
+import type { Shimdeuk } from "../../core/types";
+import { STAT_KEYS, STAT_NAMES } from "../../core/types";
+import { CharacterPortrait } from "../components";
+import { ShimdeukSkillsView } from "./Result";
+
+export function ShimdeukListScreen({ shimdeuks, onBack, onDelete }: { shimdeuks: Shimdeuk[]; onBack: () => void; onDelete: (id: string) => void }) {
+  return (
+    <div class="screen no-bar">
+      <div class="row between">
+        <h2>심득 보관함</h2>
+        <button class="btn sm ghost" onClick={onBack}>뒤로</button>
+      </div>
+      {shimdeuks.length === 0 && <p class="dim">아직 완성한 심득이 없습니다.</p>}
+      {[...shimdeuks].reverse().map((s) => {
+        const c = getCharacter(s.characterId);
+        return (
+          <div class="card col" key={s.id}>
+            <div class="row" style={{ gap: 10 }}>
+              <CharacterPortrait character={c} size="sm" />
+              <div class="grow">
+                <b>{s.name}</b>
+                <div class="small dim">{c.name} · {s.grade} · {s.score}점</div>
+              </div>
+              <button class="btn sm ghost" onClick={() => confirm(`「${s.name}」을(를) 버릴까요?`) && onDelete(s.id)}>버리기</button>
+            </div>
+            <div class="row wrap small" style={{ gap: 10 }}>
+              {STAT_KEYS.map((k) => <span key={k}>{STAT_NAMES[k]}(수련) {s.stats[k]}</span>)}
+            </div>
+            <ShimdeukSkillsView shimdeuk={s} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
